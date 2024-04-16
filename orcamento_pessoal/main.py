@@ -19,7 +19,7 @@ from tkcalendar import Calendar, DateEntry
 from datetime import date
 
 # importando funcoes da view
-from view import bar_valores, inserir_categoria, ver_categoria, inserir_receita, inserir_gastos
+from view import bar_valores, inserir_categoria, ver_categoria, inserir_receita, inserir_gastos, tabela, deletar_gastos, deletar_receitas
 
 ################# cores ###############
 co0 = "#2e2d2b"  # Preta
@@ -98,6 +98,100 @@ def inserir_categoria_b():
 
     # atualizando a lista de categorias
     combo_categoria_despesas['values'] = (categoria)
+
+
+# funcao inserir Despesas
+def inserir_despesas_b():
+    nome = combo_categoria_despesas.get()
+    data = e_cal_despesas.get()
+    quantia = e_valor_despesas.get()
+
+    lista_inserir = [nome, data, quantia]
+
+    for i in lista_inserir:
+        if i=='':
+            messagebox.showerror('Erro', 'Preencha todos os campos')
+            return
+        
+    #chamando funcao inserir Despesas presente na view
+    inserir_gastos(lista_inserir)
+
+    messagebox.showinfo('Sucesso', 'Os dados foram inseridos com sucesso!')
+
+    combo_categoria_despesas.delete(0, 'end')
+    e_cal_despesas.delete(0, 'end')
+    e_valor_despesas.delete(0, 'end')
+
+    # atualizando dados
+    mostrar_renda()
+    percentagem()
+    grafico_bar()
+    resumo()
+    grafico_pie()
+
+
+# funcao deletar
+def deletar_dados():
+    try:
+        treev_dados = tree.focus()
+        treev_dicionario = tree.item(treev_dados)
+        treev_lista = treev_dicionario['values']
+        valor = treev_lista[0]
+        nome = treev_lista[1]
+
+        if nome == 'Receita':
+            deletar_receitas([valor])
+            messagebox.showinfo('Sucesso', 'Os dados foram deletados com sucesso!')
+
+            # atualizando dados
+            mostrar_renda()
+            percentagem()
+            grafico_bar()
+            resumo()
+            grafico_pie()
+        
+        else:
+            deletar_gastos([valor])
+            messagebox.showinfo('Sucesso', 'Os dados foram deletados com sucesso!')
+
+            # atualizando dados
+            mostrar_renda()
+            percentagem()
+            grafico_bar()
+            resumo()
+            grafico_pie()
+
+    except IndexError:
+        messagebox.showerror('Erro', 'Selecione um dos dados da tabela')
+
+
+# funcao inserir Receitas
+def inserir_receitas_b():
+    nome = 'Receita'
+    data = e_cal_receitas.get()
+    quantia = e_valor_receitas.get()
+
+    lista_inserir = [nome, data, quantia]
+
+    for i in lista_inserir:
+        if i=='':
+            messagebox.showerror('Erro', 'Preencha todos os campos')
+            return
+        
+    #chamando funcao inserir Receitas presente na view
+    inserir_receita(lista_inserir)
+
+    messagebox.showinfo('Sucesso', 'Os dados foram inseridos com sucesso!')
+    e_cal_receitas.delete(0, 'end')
+    e_valor_receitas.delete(0, 'end')
+
+    # atualizando dados
+    mostrar_renda()
+    percentagem()
+    grafico_bar()
+    resumo()
+    grafico_pie()
+
 
 
 # percentagem --------------------
@@ -248,7 +342,7 @@ def mostrar_renda():
     #visualização em árvore com barras de rolagem duplas
     tabela_head = ['#Id','Categoria','Data','Quantia']
 
-    lista_itens = [[0,2,3,4],[0,2,3,4],[0,2,3,4],[0,2,3,4]]
+    lista_itens = tabela()
     
     global tree
 
@@ -292,7 +386,7 @@ l_categoria.place(x=10, y=40)
 
 
 # Pegando categorias
-categoria_funcao = ['Viagem', 'Comida']
+categoria_funcao = ver_categoria()
 categoria = []
 
 for i in categoria_funcao:
@@ -326,7 +420,7 @@ e_valor_despesas.place(x=110, y=101)
 img_add_despesas = Image.open('add.png')
 img_add_despesas = img_add_despesas.resize((17,17))
 img_add_despesas = ImageTk.PhotoImage(img_add_despesas)
-botao_inserir_despesas = Button(frame_operacoes, image=img_add_despesas, text=" Adicionar".upper(), width=80, compound=LEFT, anchor=NW, font=('Ivy 7 bold'), bg=co1, fg=co0, overrelief=RIDGE )
+botao_inserir_despesas = Button(frame_operacoes, command=inserir_despesas_b, image=img_add_despesas, text=" Adicionar".upper(), width=80, compound=LEFT, anchor=NW, font=('Ivy 7 bold'), bg=co1, fg=co0, overrelief=RIDGE )
 botao_inserir_despesas.place(x=110, y=131)
 
 # Botão Excluir
@@ -336,7 +430,7 @@ l_excluir.place(x=10, y=190)
 img_delete = Image.open('del.png')
 img_delete = img_delete.resize((17,17))
 img_delete = ImageTk.PhotoImage(img_delete)
-botao_deletar = Button(frame_operacoes, image=img_delete, text=" Deletar".upper(), width=80, compound=LEFT, anchor=NW, font=('Ivy 7 bold'), bg=co1, fg=co0, overrelief=RIDGE )
+botao_deletar = Button(frame_operacoes, command=deletar_dados, image=img_delete, text=" Deletar".upper(), width=80, compound=LEFT, anchor=NW, font=('Ivy 7 bold'), bg=co1, fg=co0, overrelief=RIDGE )
 botao_deletar.place(x=110, y=190)
 
 
@@ -348,8 +442,8 @@ l_info.place(x=10, y=10)
 # calendario -------------
 l_cal_receitas = Label(frame_configuracao, text='Data', height=1, anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
 l_cal_receitas.place(x=10, y=40)
-l_cal_receitas = DateEntry(frame_configuracao, width=12, background='darkblue', foreground='white', borderwidth=2, year=2024)
-l_cal_receitas.place(x=110, y=41)
+e_cal_receitas = DateEntry(frame_configuracao, width=12, background='darkblue', foreground='white', borderwidth=2, year=2024)
+e_cal_receitas.place(x=110, y=41)
 
 # Valor -------------
 l_valor_receitas = Label(frame_configuracao, text='Quantia total', height=1, anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
@@ -363,7 +457,7 @@ e_valor_receitas.place(x=110, y=71)
 img_add_receitas = Image.open('add.png')
 img_add_receitas = img_add_receitas.resize((17,17))
 img_add_receitas = ImageTk.PhotoImage(img_add_receitas)
-botao_inserir_despesas = Button(frame_configuracao, image=img_add_receitas, text=" Adicionar".upper(), width=80, compound=LEFT, anchor=NW, font=('Ivy 7 bold'), bg=co1, fg=co0, overrelief=RIDGE )
+botao_inserir_despesas = Button(frame_configuracao, command=inserir_receitas_b, image=img_add_receitas, text=" Adicionar".upper(), width=80, compound=LEFT, anchor=NW, font=('Ivy 7 bold'), bg=co1, fg=co0, overrelief=RIDGE )
 botao_inserir_despesas.place(x=110, y=111)
 
 
