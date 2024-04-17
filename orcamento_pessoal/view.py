@@ -1,4 +1,5 @@
 import sqlite3 as lite
+import pandas as pd
 
 # Criando conexao
 con = lite.connect('dados.db')
@@ -109,9 +110,83 @@ def tabela():
 
 # funcao para dados do grafico de barra
 def bar_valores():
-    #receita Total -------------
+    # Receita Total -------------
     receitas = ver_receitas()
     receitas_lista = []
 
     for i in receitas:
         receitas_lista.append(i[3])
+
+        
+    receita_total = sum(receitas_lista)
+
+    # Despesas Total -------------
+    gastos = ver_gastos()
+    gastos_lista = []
+
+    for i in gastos:
+        gastos_lista.append(i[3])
+
+        
+    gastos_total = sum(gastos_lista)
+    
+
+    #Saldo Total
+    saldo_total = receita_total - gastos_total
+
+    return[receita_total, gastos_total, saldo_total]
+
+# funcao grafico pie
+def pie_valores():
+    gastos = ver_gastos()
+    tabela_lista = []
+
+    for i in gastos:
+        tabela_lista.append(i)
+
+    dataframe = pd.DataFrame(tabela_lista, columns = ['id', 'categoria', 'Data', 'valor'])
+    dataframe = dataframe.groupby('categoria')['valor'].sum()
+
+    lista_quantias = dataframe.values.tolist()
+    lista_categorias = []
+
+    for i in dataframe.index:
+        lista_categorias.append(i)
+    
+    return([lista_categorias, lista_quantias])
+
+
+# funcao percentagem 
+def percentagem_valor():
+    
+    # Receita Total -------------
+    receitas = ver_receitas()
+    receitas_lista = []
+
+    for i in receitas:
+        receitas_lista.append(i[3])
+
+    # Verifica se a lista de receitas está vazia
+    if not receitas_lista:
+        receita_total = 0
+    else:
+        receita_total = sum(receitas_lista)
+
+    # Despesas Total -------------
+    gastos = ver_gastos()
+    gastos_lista = []
+
+    for i in gastos:
+        gastos_lista.append(i[3])
+
+    gastos_total = sum(gastos_lista)
+     
+
+    #Percentagem Total
+    if receita_total != 0:  # Verifica se a receita_total é diferente de zero para evitar a divisão por zero
+        total = ((receita_total - gastos_total) / receita_total) * 100
+    else:
+        total = 0  # Define total como 0 se a receita_total for zero para evitar a divisão por zero
+
+    return [total]
+    

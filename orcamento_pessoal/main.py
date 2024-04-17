@@ -19,7 +19,7 @@ from tkcalendar import Calendar, DateEntry
 from datetime import date
 
 # importando funcoes da view
-from view import bar_valores, inserir_categoria, ver_categoria, inserir_receita, inserir_gastos, tabela, deletar_gastos, deletar_receitas
+from view import bar_valores, pie_valores, percentagem_valor, inserir_categoria, ver_categoria, inserir_receita, inserir_gastos, tabela, deletar_gastos, deletar_receitas
 
 ################# cores ###############
 co0 = "#2e2d2b"  # Preta
@@ -197,7 +197,7 @@ def inserir_receitas_b():
 # percentagem --------------------
 
 def percentagem():
-    l_nome = Label(frameMeio, text="Porcentagem da Receita gasta", height=1, anchor=NW, font=('Verdana 12' ), bg=co1, fg=co4)
+    l_nome = Label(frameMeio, text="Porcentagem da Receita restante", height=1, anchor=NW, font=('Verdana 12' ), bg=co1, fg=co4)
     l_nome.place(x=7, y=5)
 
     style = ttk.Style()
@@ -207,9 +207,9 @@ def percentagem():
 
     bar = Progressbar(frameMeio, length=180, style='black.Horizontal.TProgressbar')
     bar.place(x=10, y=35)
-    bar['value'] = 50
+    bar['value'] = percentagem_valor()[0]
 
-    valor = 50
+    valor = percentagem_valor()[0]
 
     l_percentagem = Label(frameMeio, text="{:,.2f}%".format(valor), height=1, anchor=NW, font=('Verdana 12' ), bg=co1, fg=co4)
     l_percentagem.place(x=200, y=35)
@@ -219,7 +219,7 @@ def percentagem():
 
 def grafico_bar():
     lista_categorias = ['Renda','Despesas', 'Saldo']
-    lista_valores = [3000, 2000, 6236]
+    lista_valores = bar_valores()
 
     # faça figura e atribua objetos de eixo
     
@@ -266,7 +266,7 @@ def grafico_bar():
 
 # funcao de resumo total
 def resumo():
-    valor = [500, 600, 420]
+    valor = bar_valores()
 
     l_linha = Label(frameMeio, text="", width=215, height=1, anchor=NW, font=('Arial 1'), bg='#545454')
     l_linha.place(x=309, y=52)
@@ -299,8 +299,8 @@ def grafico_pie():
     figura = plt.Figure(figsize=(5, 3), dpi=90)
     ax = figura.add_subplot(111)
 
-    lista_valores = [345,225,534]
-    lista_categorias = ['Renda', 'Despesa', 'Saldo']
+    lista_valores = pie_valores()[1]
+    lista_categorias = pie_valores()[0]
 
     explode = []
     for i in lista_categorias:
